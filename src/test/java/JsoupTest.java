@@ -35,5 +35,12 @@ public class JsoupTest {
                 "</div>";
         Document document = Jsoup.parse(s);
         Elements es = document.select("div.profile-navbar a[href$=asks]");
+        String attr = es.attr("class");
+        String html = es.html();
+        String text = es.text();
+        System.out.println(text);
+        System.out.println(html);
+        System.out.println(attr);
+        System.out.println(es.toString());
     }
 }

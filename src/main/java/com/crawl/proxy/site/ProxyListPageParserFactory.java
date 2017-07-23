@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProxyListPageParserFactory {
+	
+	/**
+	 * 代理解析器的名字
+	 */
     private static Map<String, ProxyListPageParser> map  = new HashMap<>();
+    
     public static ProxyListPageParser getProxyListPageParser(Class clazz){
         String parserName = clazz.getSimpleName();
         ProxyListPageParser proxyListPageParser = null;

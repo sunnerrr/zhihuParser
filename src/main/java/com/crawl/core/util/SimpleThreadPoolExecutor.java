@@ -30,6 +30,17 @@ public class SimpleThreadPoolExecutor extends ThreadPoolExecutor{
         this.threadPoolName = threadPoolName;
     }
 
+    /**
+     * 
+     * @param corePoolSize
+     * @param maximumPoolSize
+     * @param keepAliveTime
+     * @param unit
+     * @param workQueue
+     * @param threadFactory
+     * @param handler
+     * @param threadPoolName
+     */
     public SimpleThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
                                     BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory,
                                     RejectedExecutionHandler handler, String threadPoolName) {

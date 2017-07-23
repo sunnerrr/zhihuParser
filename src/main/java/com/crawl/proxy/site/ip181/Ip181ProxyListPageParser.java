@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,13 +27,22 @@ public class Ip181ProxyListPageParser implements ProxyListPageParser {
 //        } catch (UnsupportedEncodingException e) {
 //            e.printStackTrace();
 //        }
-        Document document = Jsoup.parse(content);
+        Document document = null;
+		
+		try {
+			document = Jsoup.parse(content.getBytes("gb2312").toString());
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
         Elements elements = document.select("table tr:gt(0)");
         List<Proxy> proxyList = new ArrayList<>(elements.size());
         for (Element element : elements){
             String ip = element.select("td:eq(0)").first().text();
             String port  = element.select("td:eq(1)").first().text();
             String isAnonymous = element.select("td:eq(2)").first().text();
+            System.out.println(isAnonymous);
             if(!anonymousFlag || isAnonymous.contains("匿")){
                 proxyList.add(new Proxy(ip, Integer.valueOf(port), TIME_INTERVAL));
             }

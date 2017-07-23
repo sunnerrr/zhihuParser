@@ -1,8 +1,34 @@
 package com.crawl.core.util;
 
-import com.crawl.proxy.ProxyPool;
-import com.crawl.proxy.entity.Proxy;
-import org.apache.http.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
+import java.nio.charset.CodingErrorAction;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+
+import org.apache.http.Consts;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.CookieSpecs;
@@ -18,10 +44,10 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -31,28 +57,12 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import java.io.*;
-import java.net.UnknownHostException;
-import java.nio.charset.CodingErrorAction;
-import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import static com.crawl.core.util.Constants.TIME_INTERVAL;
-
 
 /**
- * HttpClient工具类
+ * HttpClient宸ュ叿绫�
  */
 public class HttpClientUtil {
 	private static Logger logger = SimpleLogger.getSimpleLogger(HttpClientUtil.class);
@@ -152,8 +162,8 @@ public class HttpClientUtil {
 		return getWebPage(post, "utf-8");
 	}
 	/**
-	 * @param encoding 字符编码
-     * @return 网页内容
+	 * @param encoding 瀛楃缂栫爜
+     * @return 缃戦〉鍐呭
      */
 	public static String getWebPage(HttpRequestBase request
 			, String encoding) throws IOException {
@@ -183,7 +193,7 @@ public class HttpClientUtil {
 		return getResponse(request);
 	}
 	/**
-	 * 序列化对象
+	 * 搴忓垪鍖栧璞�
 	 * @param object
 	 * @throws Exception
 	 */
@@ -193,7 +203,7 @@ public class HttpClientUtil {
 			fos = new FileOutputStream(filePath, false);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(object);
-			logger.info("序列化成功");
+			logger.info("搴忓垪鍖栨垚鍔�");
 			oos.flush();
 			fos.close();
 			oos.close();
@@ -204,7 +214,7 @@ public class HttpClientUtil {
 		}
 	}
 	/**
-	 * 反序列化对象
+	 * 鍙嶅簭鍒楀寲瀵硅薄
 	 * @param path
 	 * @throws Exception
 	 */
@@ -222,11 +232,11 @@ public class HttpClientUtil {
 	}
 
 	/**
-	 * 下载图片
-	 * @param fileURL 文件地址
-	 * @param path 保存路径
-	 * @param saveFileName 文件名，包括后缀名
-	 * @param isReplaceFile 若存在文件时，是否还需要下载文件
+	 * 涓嬭浇鍥剧墖
+	 * @param fileURL 鏂囦欢鍦板潃
+	 * @param path 淇濆瓨璺緞
+	 * @param saveFileName 鏂囦欢鍚嶏紝鍖呮嫭鍚庣紑鍚�
+	 * @param isReplaceFile 鑻ュ瓨鍦ㄦ枃浠舵椂锛屾槸鍚﹁繕闇�瑕佷笅杞芥枃浠�
 	 */
 	public static void downloadFile(String fileURL
 			, String path
@@ -236,15 +246,15 @@ public class HttpClientUtil {
 			CloseableHttpResponse response = getResponse(fileURL);
 			logger.info("status:" + response.getStatusLine().getStatusCode());
 			File file =new File(path);
-			//如果文件夹不存在则创建
+			//濡傛灉鏂囦欢澶逛笉瀛樺湪鍒欏垱寤�
 			if  (!file .exists()  && !file .isDirectory()){
 				file.mkdirs();
 			} else{
-				logger.info("//目录存在");
+				logger.info("//鐩綍瀛樺湪");
 			}
 			file = new File(path + saveFileName);
 			if(!file.exists() || isReplaceFile){
-				//如果文件不存在，则下载
+				//濡傛灉鏂囦欢涓嶅瓨鍦紝鍒欎笅杞�
 				try {
 					OutputStream os = new FileOutputStream(file);
 					InputStream is = response.getEntity().getContent();
@@ -257,22 +267,22 @@ public class HttpClientUtil {
 						byte[] temp = new byte[readed];
 						System.arraycopy(buff, 0, temp, 0, readed);
 						os.write(temp);
-						logger.info("文件下载中....");
+						logger.info("鏂囦欢涓嬭浇涓�....");
 					}
 					is.close();
 					os.close();
-					logger.info(fileURL + "--文件成功下载至" + path + saveFileName);
+					logger.info(fileURL + "--鏂囦欢鎴愬姛涓嬭浇鑷�" + path + saveFileName);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 			else{
 				logger.info(path);
-				logger.info("该文件存在！");
+				logger.info("璇ユ枃浠跺瓨鍦紒");
 			}
 			response.close();
 		} catch(IllegalArgumentException e){
-			logger.info("连接超时...");
+			logger.info("杩炴帴瓒呮椂...");
 		} catch(Exception e1){
 			e1.printStackTrace();
 		}
@@ -285,8 +295,8 @@ public class HttpClientUtil {
 		HttpClientUtil.cookieStore = cookieStore;
 	}
 	/**
-	 * 有bug 慎用
-	 * unicode转化String
+	 * 鏈塨ug 鎱庣敤
+	 * unicode杞寲String
 	 * @return
      */
 	public static String decodeUnicode(String dataStr) {
@@ -303,7 +313,7 @@ public class HttpClientUtil {
 			String tempStr = dataStr.substring(start, end);
 			String charStr = "";
 			charStr = dataStr.substring(start, end);
-			char letter = (char) Integer.parseInt(charStr, 16); // 16进制parse整形字符串。
+			char letter = (char) Integer.parseInt(charStr, 16); // 16杩涘埗parse鏁村舰瀛楃涓层��
 			dataStr = dataStr.replace("\\u" + tempStr, letter + "");
 			start = end;
 		}
@@ -311,7 +321,7 @@ public class HttpClientUtil {
 		return dataStr;
 	}
 	/**
-	 * 设置request请求参数
+	 * 璁剧疆request璇锋眰鍙傛暟
 	 * @param request
 	 * @param params
      */
